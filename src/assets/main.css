@@ -3,30 +3,19 @@
 #app {
   /* max-width: 1280px; */
   font-weight: normal;
+  height: 100dvh;
   display: grid;
+  grid-template-rows: 64px calc(100dvh - 2 * 64px - 2 * 1rem) 64px;
   gap: 1rem;
+}
+
+main {
+  @apply max-w-screen-lg mx-auto w-full min-w-0 px-2;
 }
 
 a,
 .green {
   text-decoration: none;
-  /* color: hsla(160, 100%, 37%, 1); */
   transition: 0.4s;
   padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    /* background-color: hsla(160, 100%, 37%, 0.2); */
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    /* display: flex; */
-  }
-
-  #app {
-    /*  */
-  }
 }
