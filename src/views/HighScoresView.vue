@@ -6,15 +6,16 @@ import PageHeader from '../components/PageHeader.vue'
 
 <template>
   <PageHeader />
-  <main class="grid items-start *:row-start-1 *:col-start-1">
-    <GameBoard disabled />
-    <div class="grid place-content-center">
-      <div>
-        <h1 class="text-5xl my-8 leading-normal font-['PlasticSans'] text-[--brand-blue-light]">
-          Toplista
-        </h1>
+  <main>
+    <GameBoard class="overflow-hidden">
+      <div class="grid justify-center bg-black/50">
+        <div>
+          <h1 class="text-5xl my-8 leading-normal font-['PlasticSans'] text-[--brand-blue-light]">
+            Toplista
+          </h1>
+        </div>
       </div>
-    </div>
+    </GameBoard>
   </main>
   <PageFooter />
 </template>
