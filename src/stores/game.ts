@@ -1,5 +1,6 @@
 import { ref, reactive, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { postResult } from '../api'
 
 export type Board = Array<Array<number | null>>
 
@@ -29,7 +30,7 @@ export const useGameStore = defineStore('game', () => {
     coordinates: [],
   })
 
-  const state = ref<'init' | 'playerX' | 'playerO' | 'play'>('play') // TODO
+  const state = ref<'init' | 'playerX' | 'playerO' | 'play'>('init') // TODO
 
   const active = computed(() => {
     const m = (playerX.coordinates.length + playerO.coordinates.length) % 2
@@ -73,6 +74,7 @@ export const useGameStore = defineStore('game', () => {
     const name = winner.value.name
 
     console.log({ points, name })
+    await postResult(name, points)
   }
 
   return { state, board, playerX, playerO, winner, change, restart }

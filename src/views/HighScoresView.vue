@@ -1,7 +1,14 @@
 <script setup lang="ts">
+import { useQuery } from '@tanstack/vue-query'
+import { getHighScores } from '../api'
 import GameBoard from '../components/GameBoard.vue'
 import PageFooter from '../components/PageFooter.vue'
 import PageHeader from '../components/PageHeader.vue'
+
+const { isPending, isError, data, error } = useQuery({
+  queryKey: ['high-scores'],
+  queryFn: getHighScores,
+})
 </script>
 
 <template>
@@ -13,6 +20,12 @@ import PageHeader from '../components/PageHeader.vue'
           <h1 class="text-5xl my-8 leading-normal font-['PlasticSans'] text-[--brand-blue-light]">
             Toplista
           </h1>
+          <span v-if="isPending">Loading...</span>
+          <span v-else-if="isError">Error: {{ error?.message }}</span>
+          <!-- We can assume by this point that `isSuccess === true` -->
+          <ul v-else>
+            <li v-for="player in data" :key="player.id">{{ player.name }}</li>
+          </ul>
         </div>
       </div>
     </GameBoard>

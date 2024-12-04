@@ -16,7 +16,6 @@ const game = useGameStore()
         class="grid items-start justify-center bg-black/50 p-8"
       >
         <button
-          v-if="!!game.winner"
           @click="game.restart"
           class="flex items-center justify-center px-4 py-2 uppercase text-center bg-[--brand-orange]"
         >
