@@ -3,6 +3,8 @@ import { useGameStore } from '../stores/game'
 import GameBoard from '../components/GameBoard.vue'
 import PageFooter from '../components/PageFooter.vue'
 import PageHeader from '../components/PageHeader.vue'
+import PlayerForm from '../components/PlayerForm.vue'
+import BoardForm from '../components/BoardForm.vue'
 
 const game = useGameStore()
 </script>
@@ -11,17 +13,9 @@ const game = useGameStore()
   <PageHeader />
   <main>
     <GameBoard>
-      <div
-        v-if="!!game.winner || game.state !== 'play'"
-        class="grid items-start justify-center bg-black/50 p-8"
-      >
-        <button
-          @click="game.restart"
-          class="flex items-center justify-center px-4 py-2 uppercase text-center bg-[--brand-orange]"
-        >
-          Új játék
-        </button>
-      </div>
+      <BoardForm v-if="game.state === 'init'" />
+      <PlayerForm v-if="game.state === 'playerX'" :player="game.playerX" next-state="playerO" />
+      <PlayerForm v-if="game.state === 'playerO'" :player="game.playerO" next-state="play" />
     </GameBoard>
   </main>
   <PageFooter />

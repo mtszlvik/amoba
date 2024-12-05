@@ -19,3 +19,19 @@ a,
   transition: 0.4s;
   padding: 3px;
 }
+
+input {
+  @apply px-2 py-1 text-gray-900;
+}
+
+.btn {
+  @apply flex items-center justify-center px-4 py-2 uppercase text-center;
+
+  &.primary {
+    background-color: var(--brand-orange);
+  }
+
+  &.secondary {
+    background-color: var(--brand-blue-ligth);
+  }
+}

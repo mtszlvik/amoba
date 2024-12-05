@@ -4,81 +4,119 @@ import { postResult } from '../api'
 
 export type Board = Array<Array<number | null>>
 
+type Coordinate = {
+  x: number
+  y: number
+}
+
 export type Player = {
   id: number
   name: string
-  coordinates: Array<{ x: number; y: number }>
+  icon: string
+  coordinates: Coordinate[]
 }
 
 export type Winner = Player & {
-  match: Array<{ x: number; y: number }>
+  match: Coordinate[]
 }
 
-export const useGameStore = defineStore('game', () => {
-  const width = ref(30)
-  const height = ref(30)
-  const targetCount = ref(5)
+export type State = 'init' | 'playerX' | 'playerO' | 'play'
 
-  const playerX = reactive<Player>({
-    id: -1,
-    name: 'Player X',
-    coordinates: [],
-  })
-  const playerO = reactive<Player>({
-    id: 1,
-    name: 'Player O',
-    coordinates: [],
-  })
+export const useGameStore = defineStore(
+  'game',
+  () => {
+    const width = ref(30)
+    const height = ref(30)
+    const targetCount = ref(5)
 
-  const state = ref<'init' | 'playerX' | 'playerO' | 'play'>('init') // TODO
+    const playerX = reactive<Player>({
+      id: -1,
+      name: 'Player X',
+      icon: 'maci_01',
+      coordinates: [],
+    })
+    const playerO = reactive<Player>({
+      id: 1,
+      name: 'Player O',
+      icon: 'maci_02',
+      coordinates: [],
+    })
 
-  const active = computed(() => {
-    const m = (playerX.coordinates.length + playerO.coordinates.length) % 2
-    return m === 0 ? playerX : playerO
-  })
-  const board = computed<Board>(() => {
-    return Array<Board>(height.value)
-      .fill(Array(width.value).fill(null))
-      .map((row, i) => {
-        return row.map((_cell, j) => {
-          const hasX = playerX.coordinates.some((c) => c.x === i && c.y === j)
-          const hasO = playerO.coordinates.some((c) => c.x === i && c.y === j)
+    const state = ref<State>('init') // TODO
 
-          return hasX ? -1 : hasO ? 1 : null
+    const active = computed(() => {
+      const m = (playerX.coordinates.length + playerO.coordinates.length) % 2
+      return m === 0 ? playerX : playerO
+    })
+    const board = computed<Board>(() => {
+      return Array<Board>(height.value)
+        .fill(Array(width.value).fill(null))
+        .map((row, i) => {
+          return row.map((_cell, j) => {
+            const hasX = playerX.coordinates.some((c) => c.x === i && c.y === j)
+            const hasO = playerO.coordinates.some((c) => c.x === i && c.y === j)
+
+            return hasX ? -1 : hasO ? 1 : null
+          })
         })
-      })
-  })
-  const winner = computed<Winner | null>(() => {
-    const w = getWinner(board.value, targetCount.value)
-    if (!w) return null
-    const p = w.id === -1 ? playerX : playerO
+    })
+    const winner = computed<Winner | null>(() => {
+      const w = getWinner(width.value, height.value, board.value, targetCount.value)
+      if (!w) return null
+      const p = w.id === -1 ? playerX : playerO
+      return {
+        ...p,
+        match: w.match,
+      }
+    })
+
+    function restart() {
+      playerX.coordinates = []
+      playerO.coordinates = []
+      state.value = 'init'
+    }
+
+    async function change(x: number, y: number) {
+      active.value.coordinates.push({ x, y })
+
+      if (!winner.value) {
+        return
+      }
+      const points = winner.value.coordinates.length
+      const name = winner.value.name
+
+      console.log({ points, name })
+      await postResult(name, points)
+    }
+
+    function setPlayer(id: number, name: string, icon: string) {
+      if (id < 0) {
+        playerX.name = name
+        playerX.icon = icon
+        state.value = 'playerO'
+        return
+      }
+      playerO.name = name
+      playerO.icon = icon
+      state.value = 'play'
+    }
+
     return {
-      ...p,
-      match: w.match,
+      state,
+      width,
+      height,
+      targetCount,
+      board,
+      playerX,
+      playerO,
+      winner,
+      change,
+      restart,
+      setPlayer,
     }
-  })
-
-  function restart() {
-    playerX.coordinates = []
-    playerO.coordinates = []
-    state.value = 'play' // TODO
-  }
-
-  async function change(x: number, y: number) {
-    active.value.coordinates.push({ x, y })
-
-    if (!winner.value) {
-      return
-    }
-    const points = winner.value.coordinates.length
-    const name = winner.value.name
-
-    console.log({ points, name })
-    await postResult(name, points)
-  }
-
-  return { state, board, playerX, playerO, winner, change, restart }
-})
+  },
+  { persist: true },
+)
 
 function horizontalMatch(board: Board, targetCount: number) {
   for (const [i, row] of board.entries()) {
@@ -100,12 +138,14 @@ function horizontalMatch(board: Board, targetCount: number) {
   return null
 }
 
-function verticalMatch(board: Board, targetCount: number) {
-  const newBoard = board.map((row, i) => {
-    return row.map((_cell, j) => {
-      return board[j][i]
+function verticalMatch(width: number, height: number, board: Board, targetCount: number) {
+  const newBoard = Array<Array<number | null>>(width)
+    .fill(Array(height).fill(null))
+    .map((row, i) => {
+      return row.map((_cell, j) => {
+        return board[j][i]
+      })
     })
-  })
   const result = horizontalMatch(newBoard, targetCount)
   if (!result) return null
   return {
@@ -114,9 +154,9 @@ function verticalMatch(board: Board, targetCount: number) {
   }
 }
 
-function getWinner(board: Board, targetCount: number) {
+function getWinner(width: number, height: number, board: Board, targetCount: number) {
   const hw = horizontalMatch(board, targetCount)
-  const vw = verticalMatch(board, targetCount)
+  const vw = verticalMatch(width, height, board, targetCount)
 
   return hw ?? vw ?? null
 }

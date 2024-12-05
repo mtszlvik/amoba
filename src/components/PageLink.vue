@@ -3,7 +3,7 @@ defineProps<{ to: string }>()
 </script>
 
 <template>
-  <RouterLink :to="to" class="flex items-center justify-center px-4 py-2 uppercase text-center">
+  <RouterLink :to="to" class="btn">
     <slot></slot>
   </RouterLink>
 </template>
