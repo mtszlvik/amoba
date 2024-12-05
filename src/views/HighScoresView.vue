@@ -23,8 +23,17 @@ const { isPending, isError, data, error } = useQuery({
           <span v-if="isPending">Loading...</span>
           <span v-else-if="isError">Error: {{ error?.message }}</span>
           <!-- We can assume by this point that `isSuccess === true` -->
-          <ul v-else>
-            <li v-for="player in data" :key="player.id">{{ player.name }}</li>
+          <ul v-else class="grid gap-4">
+            <li v-for="player in data" :key="player.id">
+              <div>
+                <span class="mr-2">name:</span>
+                <span>"{{ player.name }}"</span>
+              </div>
+              <div>
+                <span class="mr-2">score:</span>
+                <span>{{ player.score }}</span>
+              </div>
+            </li>
           </ul>
         </div>
       </div>
